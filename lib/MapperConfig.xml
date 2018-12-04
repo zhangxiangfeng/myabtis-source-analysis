@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+       Copyright 2009-2012 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--所有配置参考这里  http://www.mybatis.org/mybatis-3/zh/configuration.html#-->
+<configuration>
+
+    <properties resource="org/apache/ibatis/databases/account/account-mysql.properties">
+        <property name="name" value="simon"/>
+    </properties>
+
+    <settings>
+        <!--Mybatis 的内置日志工厂提供日志功能，内置日志工厂将日志交给以下其中一种工具作代理,详见Configuration.java-->
+        <!--SLF4J-->
+        <!--Apache Commons Logging-->
+        <!--Log4j 2-->
+        <!--Log4j-->
+        <!--JDK logging-->
+        <!--SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING-->
+        <setting name="logImpl" value="LOG4J"/>
+        <!--手动开启二级全局缓存-->
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="multipleResultSetsEnabled" value="true"/>
+        <setting name="useColumnLabel" value="true"/>
+        <setting name="useGeneratedKeys" value="false"/>
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <setting name="defaultStatementTimeout" value="25"/>
+        <!--是否开启自动驼峰命名规则（camel case）映射，即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--指定 Mybatis 创建具有延迟加载能力的对象所用到的代理工具。	CGLIB | JAVASSIST-->
+        <setting name="proxyFactory" value="CGLIB"/>
+        <!--指定 MyBatis 增加到日志名称的前缀,日志落地的时候的文件名称-->
+        <setting name="logPrefix" value="SIMON-PREFIX-"/>
+    </settings>
+
+    <!--给Class起别名,方便在XML中不需要写全限定名了-->
+    <typeAliases>
+        <typeAlias alias="Account" type="org.apache.ibatis.domain.account.Account"/>
+    </typeAliases>
+
+    <typeHandlers>
+        <typeHandler javaType="String" jdbcType="VARCHAR" handler="org.apache.ibatis.builder.ExampleTypeHandler"/>
+    </typeHandlers>
+
+    <objectFactory type="org.apache.ibatis.builder.ExampleObjectFactory">
+        <property name="objectFactoryProperty" value="100"/>
+    </objectFactory>
+
+    <plugins>
+        <plugin interceptor="org.apache.ibatis.builder.ExamplePlugin">
+            <property name="pluginProperty" value="100"/>
+        </plugin>
+        <!--监控 sql 埋点 分页-->
+        <plugin interceptor="cn.openread.test.simple.plugin.SqlPrintInterceptor"></plugin>
+    </plugins>
+
+    <!--配置默认环境-->
+    <environments default="development">
+        <!--开发环境-->
+        <environment id="development">
+            <!--事务管理器（transactionManager）-->
+            <!--在 MyBatis 中有两种类型的事务管理器（也就是 type=”[JDBC|MANAGED]”）：-->
+            <!--JDBC – 这个配置就是直接使用了 JDBC 的提交和回滚设置，它依赖于从数据源得到的连接来管理事务作用域。-->
+            <!--MANAGED – 这个配置几乎没做什么。它从来不提交或回滚一个连接，而是让容器来管理事务的整个生命周期（比如 JEE 应用服务器的上下文）。
+            默认情况下它会关闭连接，然而一些容器并不希望这样，因此需要将 closeConnection 属性设置为 false 来阻止它默认的关闭行为。例如:-->
+            <transactionManager type="JDBC">
+                <property name="closeConnection" value="false"/>
+            </transactionManager>
+            <!--配置参考 https://github.com/brettwooldridge/HikariCP-->
+            <dataSource type="cn.openread.test.simple.MyBatisHikariDataSource">
+                <property name="driverClassName" value="${driver}"/>
+                <property name="jdbcUrl" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+                <property name="autoCommit" value="false"/>
+                <property name="transactionIsolation" value="TRANSACTION_REPEATABLE_READ"/>
+                <property name="minimumIdle" value="5"/>
+                <property name="maximumPoolSize" value="10"/>
+                <property name="poolName" value="simon-hikari-datasource"/>
+            </dataSource>
+        </environment>
+        <!--生产环境-->
+        <environment id="prod">
+            <transactionManager type="MANAGED">
+                <property name="closeConnection" value="false"/>
+            </transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--databaseIdProvider-->
+    <!--MyBatis 可以根据不同的数据库厂商执行不同的语句，这种多厂商的支持是基于映射语句中的 databaseId 属性。
+    MyBatis 会加载不带 databaseId 属性和带有匹配当前数据库 databaseId 属性的所有语句。 如果同时找到带有 databaseId 和不带 databaseId 的相同语句
+    ，则后者会被舍弃。 为支持多厂商特性只要像下面这样在 mybatis-config.xml 文件中加入 databaseIdProvider 即可：-->
+    <databaseIdProvider type="DB_VENDOR">
+        <property name="SQL Server" value="sqlserver"/>
+        <property name="DB2" value="db2"/>
+        <property name="Oracle" value="oracle"/>
+        <property name="MySql" value="mysql"/>
+    </databaseIdProvider>
+
+    <!--所有的xml配置-->
+    <mappers>
+        <!-- 使用相对于类路径的资源引用 -->
+        <!--<mapper resource="org/apache/ibatis/builder/AccountMapper.xml"/>-->
+
+        <!-- 使用映射器接口实现类的完全限定类名 -->
+        <!--<mapper class="org.mybatis.builder.AuthorMapper"/>-->
+        <mapper class="org.apache.ibatis.domain.account.mappers.AccountAnnoMapper"/>
+
+        <!-- 使用完全限定资源定位符（URL） -->
+        <!--<mapper url="file:///var/mappers/BlogMapper.xml"/>-->
+
+        <!-- 将包内的映射器接口实现全部注册为映射器 -->
+        <!--<package name="org.mybatis.builder"/>-->
+    </mappers>
+
+</configuration>

@@ -1,0 +1,13 @@
+这里介绍Mybatis如何加载你使用的注解。
+
+org.apache.ibatis.session.SqlSessionFactoryBuilder.build 创建SqlSessionFactory
+  > org.apache.ibatis.builder.xml.XMLConfigBuilder.parse 转化xml配置文件为JavaBean
+   > org.apache.ibatis.builder.xml.XMLConfigBuilder.mapperElement  转化xml中的mapper配置为Configuration.mapperRegistry
+     > org.apache.ibatis.binding.MapperRegistry.addMapper 这里添加class配置,
+      > org.apache.ibatis.builder.annotation.MapperAnnotationBuilder.parse 转化注解配置的xml
+        >org.apache.ibatis.builder.annotation.MapperAnnotationBuilder.parseCache 转化cache注解
+        >org.apache.ibatis.builder.annotation.MapperAnnotationBuilder.parseCacheRef 转化cacheRef注解
+        >org.apache.ibatis.builder.annotation.MapperAnnotationBuilder.parseStatement 转化CRUD注解的SQL 最后添加到Configuration.mappedStatement
+
+
+

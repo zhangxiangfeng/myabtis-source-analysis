@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="defaultExecutorType" value="REUSE"/>
+        <setting name="defaultStatementTimeout" value="25000"/>
+    </settings>
+    <mappers>
+        <mapper resource="com/mybatis3/mappers/StudentMapper.xml"/>
+        <mapper resource="com/mybatis3/mappers/TeacherMapper.xml"/>
+    </mappers>
+</configuration>
