@@ -71,6 +71,7 @@ public final class PreparedStatementLogger extends BaseJdbcLogger implements Inv
                     return method.invoke(statement, params);
                 }
             } else if (SET_METHODS.contains(method.getName())) {
+                //TODO 这里进行设置了参数,代理模式进行操作的,这里设置为下一步结果处理奠定基础
                 if ("setNull".equals(method.getName())) {
                     setColumn(params[0], null);
                 } else {

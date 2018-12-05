@@ -311,6 +311,9 @@ public abstract class BaseExecutor implements Executor {
         return list;
     }
 
+    /**
+     * TODO 获取连接的时候进行了LOG包装 ConnectionLogge(代理)r+PreparedStatementLogger(代理)
+     */
     protected Connection getConnection(Log statementLog) throws SQLException {
         Connection connection = transaction.getConnection();
         if (statementLog.isDebugEnabled()) {

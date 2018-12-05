@@ -126,11 +126,11 @@
     <!--所有的xml配置-->
     <mappers>
         <!-- 使用相对于类路径的资源引用 -->
-        <!--<mapper resource="org/apache/ibatis/builder/AccountMapper.xml"/>-->
+        <mapper resource="org/apache/ibatis/builder/AccountMapper.xml"/>
 
         <!-- 使用映射器接口实现类的完全限定类名 -->
         <!--<mapper class="org.mybatis.builder.AuthorMapper"/>-->
-        <mapper class="org.apache.ibatis.domain.account.mappers.AccountAnnoMapper"/>
+        <!--<mapper class="org.apache.ibatis.domain.account.mappers.AccountAnnoMapper"/>-->
 
         <!-- 使用完全限定资源定位符（URL） -->
         <!--<mapper url="file:///var/mappers/BlogMapper.xml"/>-->

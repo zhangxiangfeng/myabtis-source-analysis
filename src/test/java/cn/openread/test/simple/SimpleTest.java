@@ -31,7 +31,7 @@ public class SimpleTest {
 
     private SqlSession sqlSession = null;
 
-    //    @Before
+    @Before
     public void before() throws IOException {
         //step 1.读取配置文件
         Reader reader = Resources.getResourceAsReader("cn/openread/test/simple/xml/MapperConfig.xml");
@@ -39,7 +39,7 @@ public class SimpleTest {
 //        new SqlSessionFactoryBuilder().build(reader);
     }
 
-    @Before
+    //    @Before
     public void beforeForClassLoader() throws IOException {
         //step 1.自定义类加载器
         SimonClassLoader classLoader = new SimonClassLoader("C:\\SortWare\\simon-projects\\labs\\mybatis-3\\lib");
@@ -59,14 +59,14 @@ public class SimpleTest {
     public void testSelectById() throws IOException {
         try {
             AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
-            Account account = accountMapper.selectById(10000L);
+            Account account = accountMapper.selectById(10002L);
             log.debug("查询结果:" + JSON.toJSONString(account));
 //            sqlSession.commit();
-            account = accountMapper.selectById(10000L);
+            account = accountMapper.selectById(10002L);
             log.debug("查询结果:" + JSON.toJSONString(account));
 
             sqlSession.commit();
-            account = accountMapper.selectById(10000L);
+            account = accountMapper.selectById(10002L);
             log.debug("查询结果:" + JSON.toJSONString(account));
 
         } finally {
