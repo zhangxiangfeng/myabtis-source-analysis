@@ -51,8 +51,8 @@ public class SimpleTest {
         Reader reader = Resources.getResourceAsReader(classLoader, "MapperConfig.xml");
 
         //step 4.解析读取的文件流 && new一个SqlManager
-        sqlSession = SqlSessionManager.newInstance(reader).openSession();
-//        new SqlSessionFactoryBuilder().build(reader);
+        SqlSessionManager sqlSessionManager = SqlSessionManager.newInstance(reader);
+        sqlSession = sqlSessionManager.openSession();
     }
 
     @Test

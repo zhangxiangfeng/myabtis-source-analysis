@@ -38,7 +38,7 @@ import java.util.List;
  * 1.DefaultObjectFactory 反射创建对象工厂类,通过反射，动态创建一个类，并且赋予属性
  * 2.Resources IO读取;包含class,xml
  * 3.Reflector、Invoker、ReflectorFactory;获取一个类的属性，方法，构造器
- * 4. XPath、EntityResolver 解析XML的工具
+ * 4.XPath、EntityResolver 解析XML的工具
  *
  * @author simon
  * @create 2018-05-21 下午6:22

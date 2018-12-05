@@ -11,7 +11,7 @@ MYBATIS Data Mapper Framework
 `The MyBatis data mapper framework makes it easier to use a relational database with object-oriented applications. MyBatis couples objects with stored procedures or SQL statements using a XML descriptor or annotations. Simplicity is the biggest advantage of the MyBatis data mapper over object relational mapping tools.`
 
 
-**`译文:`**MyBatis数据映射器框架使关系数据库与面向对象的应用程序的使用变得更加容易。 MyBatis使用XML描述符或注释将对象与存储过程或SQL语句结合在一起。 简单性是MyBatis数据映射器相对于对象关系映射工具的最大优势。
+MyBatis数据映射器框架使关系数据库与面向对象的应用程序的使用变得更加容易。 MyBatis使用XML描述符或注释将对象与存储过程或SQL语句结合在一起。 简单性是MyBatis数据映射器相对于对象关系映射工具的最大优势。
 
 Essentials
 ----------
@@ -32,6 +32,7 @@ SqlSession sqlSession = SqlSessionManager.newInstance(reader).openSession();
 AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
 
 List<Account> accounts = accountMapper.selectAll();
+
 log.debug("查询结果:" + JSON.toJSONString(accounts));
 ```
 ### 1.深入分析起步读取

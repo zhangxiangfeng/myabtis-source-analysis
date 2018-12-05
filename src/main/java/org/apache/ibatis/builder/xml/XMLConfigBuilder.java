@@ -127,13 +127,27 @@ public class XMLConfigBuilder extends BaseBuilder {
 
             //step 6.支持覆盖Mybatis的DefaultObjectFactory实现
             objectFactoryElement(root.evalNode("objectFactory"));
-            objectWrapperFactoryElement(root.evalNode("objectWrapperFactory")); //设置对象包装类
-            reflectionFactoryElement(root.evalNode("reflectionFactory"));//设置反射工厂类，可以自定义替换Mybatis的实现
-            settingsElement(settings); //设置配置，一些默认的内容,例如默认的执行器  XMLConfigBuilder:231
+
+            //step 7.设置对象包装类,使用支持外部配置覆盖
+            objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+
+            //step 8.设置反射工厂类，可以自定义替换Mybatis的实现
+            reflectionFactoryElement(root.evalNode("reflectionFactory"));
+
+            //step 9.设置一些默认的配置,例如默认的执行器
+            settingsElement(settings);
+
             // read it after objectFactory and objectWrapperFactory issue #631
-            environmentsElement(root.evalNode("environments"));// 判断环境以及使用哪一个事务处理类
-            databaseIdProviderElement(root.evalNode("databaseIdProvider")); //根据数据库返回的元数据，判断是什么数据库
-            typeHandlerElement(root.evalNode("typeHandlers"));//查询结果后，字段类型映射器
+            //step 10.获取环境配置 && 判断选择的环境 && 判断使用哪一个事务处理类
+            environmentsElement(root.evalNode("environments"));
+
+            //step 11.根据数据库返回的元数据，判断是什么数据库,传入对应的SQL语句
+            databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+
+            //step 12.查询结果后，字段类型映射器映射到对应的类上，最终注册到configuration.typeHandlerRegistry里面
+            typeHandlerElement(root.evalNode("typeHandlers"));
+
+            //step 13.最后解析mappers标签,最后添加到configuration.mapperRegistry
             mapperElement(root.evalNode("mappers")); //加载不同的配置形式 resource，url，class的
         } catch (Exception e) {
             throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -314,14 +328,26 @@ public class XMLConfigBuilder extends BaseBuilder {
     private void environmentsElement(XNode context) throws Exception {
         if (context != null) {
             if (environment == null) {
+                //step 1.解析选取的指定环境
                 environment = context.getStringAttribute("default");
             }
             for (XNode child : context.getChildren()) {
+                //step 2.获取环境ID
                 String id = child.getStringAttribute("id");
+
+                //step 3.判断当前循环是否是指定的环境ID
                 if (isSpecifiedEnvironment(id)) {
+
+                    //step 4.解析transactionManager标签,这里会抉择 JDBC||MANAGED
                     TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+
+                    //step 5.解析dataSource标签
                     DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
+
+                    //step 6.获取数据源
                     DataSource dataSource = dsFactory.getDataSource();
+
+                    //step 7.设置环境的最后一部,事务处理类+数据源
                     Environment.Builder environmentBuilder = new Environment.Builder(id)
                             .transactionFactory(txFactory)
                             .dataSource(dataSource);
@@ -404,6 +430,8 @@ public class XMLConfigBuilder extends BaseBuilder {
             for (XNode child : parent.getChildren()) {
                 if ("package".equals(child.getName())) {
                     String mapperPackage = child.getStringAttribute("name");
+
+                    //step 1.读取指定的包下面所有的类,使用注解解析
                     configuration.addMappers(mapperPackage);
                 } else {
                     String resource = child.getStringAttribute("resource");
@@ -413,14 +441,20 @@ public class XMLConfigBuilder extends BaseBuilder {
                         ErrorContext.instance().resource(resource);
                         InputStream inputStream = Resources.getResourceAsStream(resource);
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
-                        mapperParser.parse();//读取转化mapper里面的sql语句
+
+                        //step 2.读取转化mapper里面的sql语句,使用XML解析
+                        mapperParser.parse();
                     } else if (resource == null && url != null && mapperClass == null) {
                         ErrorContext.instance().resource(url);
                         InputStream inputStream = Resources.getUrlAsStream(url);
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
+
+                        //step 3.读取转化mapper里面的sql语句,使用XML解析
                         mapperParser.parse();
                     } else if (resource == null && url == null && mapperClass != null) {
                         Class<?> mapperInterface = Resources.classForName(mapperClass);
+
+                        //step 4.读取指定类,使用注解解析
                         configuration.addMapper(mapperInterface);
                     } else {
                         throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");

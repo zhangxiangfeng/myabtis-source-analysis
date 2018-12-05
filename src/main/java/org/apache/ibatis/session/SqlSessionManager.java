@@ -38,6 +38,11 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
     private ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<SqlSession>();
 
+    /**
+     * 内部私有构造器
+     * <p>
+     * 1.构造内部sqlSessionProxy的时候，对SqlSession接口做了JDK代理
+     */
     private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
         this.sqlSessionFactory = sqlSessionFactory;
         this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
@@ -321,6 +326,12 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
         }
     }
 
+    /**
+     * 代理SqlSession的操作
+     * <p>
+     * 1.获取当前副本的localSqlSession
+     * 2.不存在,就重新打开一个session，进行代理
+     */
     private class SqlSessionInterceptor implements InvocationHandler {
         public SqlSessionInterceptor() {
             // Prevent Synthetic Access

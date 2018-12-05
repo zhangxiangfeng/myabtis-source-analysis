@@ -63,6 +63,8 @@
         <property name="objectFactoryProperty" value="100"/>
     </objectFactory>
 
+    <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>
+
     <plugins>
         <plugin interceptor="org.apache.ibatis.builder.ExamplePlugin">
             <property name="pluginProperty" value="100"/>
