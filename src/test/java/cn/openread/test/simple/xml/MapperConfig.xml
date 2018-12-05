@@ -70,7 +70,7 @@
             <property name="pluginProperty" value="100"/>
         </plugin>
         <!--监控 sql 埋点 分页-->
-        <plugin interceptor="cn.openread.test.simple.plugin.SqlPrintInterceptor"></plugin>
+        <plugin interceptor="cn.openread.test.simple.plugin.SqlPrintInterceptor"/>
     </plugins>
 
     <!--配置默认环境-->

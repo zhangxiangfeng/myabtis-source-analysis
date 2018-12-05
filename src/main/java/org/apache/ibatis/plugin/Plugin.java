@@ -93,9 +93,10 @@ public class Plugin implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         try {
+            //step 0.调用之前校验签名信息
             Set<Method> methods = signatureMap.get(method.getDeclaringClass());
             if (methods != null && methods.contains(method)) {
-//                这里做真正的针对于method的拦截
+                //step 1.这里做真正的针对于method的拦截
                 return interceptor.intercept(new Invocation(target, method, args));
             }
             return method.invoke(target, args);

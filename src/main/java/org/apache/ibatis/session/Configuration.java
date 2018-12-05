@@ -505,7 +505,7 @@ public class Configuration {
             executor = new CachingExecutor(executor);
         }
 
-        //setp 3.进行拦截器的代理设置
+        //setp 3.进行拦截器的代理设置-(到每一个拦截器内部也可以针对性拦截),这里设置后,之后这个executor执行方法的时候,都会被依次拦截
         executor = (Executor) interceptorChain.pluginAll(executor);
 
         return executor;

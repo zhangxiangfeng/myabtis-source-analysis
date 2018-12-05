@@ -24,6 +24,9 @@ public interface Interceptor {
 
     Object intercept(Invocation invocation) throws Throwable;
 
+    /**
+     * 实现类如果实现这个函数,就可以针对性的进行SQL拦截
+     */
     Object plugin(Object target);
 
     void setProperties(Properties properties);

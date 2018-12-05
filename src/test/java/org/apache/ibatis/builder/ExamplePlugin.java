@@ -35,9 +35,11 @@ public class ExamplePlugin implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(ExamplePlugin.class);
 
     public Object intercept(Invocation invocation) throws Throwable {
+        System.err.println(this.getClass().getName());
         return invocation.proceed();
     }
 
+    //
     public Object plugin(Object target) {
         return Plugin.wrap(target, this);
     }

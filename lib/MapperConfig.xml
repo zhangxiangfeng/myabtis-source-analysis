@@ -23,9 +23,7 @@
 <!--所有配置参考这里  http://www.mybatis.org/mybatis-3/zh/configuration.html#-->
 <configuration>
 
-    <properties resource="org/apache/ibatis/databases/account/account-mysql.properties">
-        <property name="name" value="simon"/>
-    </properties>
+    <properties resource="org/apache/ibatis/databases/account/account-mysql.properties"/>
 
     <settings>
         <!--Mybatis 的内置日志工厂提供日志功能，内置日志工厂将日志交给以下其中一种工具作代理,详见Configuration.java-->
@@ -65,12 +63,14 @@
         <property name="objectFactoryProperty" value="100"/>
     </objectFactory>
 
+    <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>
+
     <plugins>
         <plugin interceptor="org.apache.ibatis.builder.ExamplePlugin">
             <property name="pluginProperty" value="100"/>
         </plugin>
         <!--监控 sql 埋点 分页-->
-        <plugin interceptor="cn.openread.test.simple.plugin.SqlPrintInterceptor"></plugin>
+        <plugin interceptor="cn.openread.test.simple.plugin.SqlPrintInterceptor"/>
     </plugins>
 
     <!--配置默认环境-->

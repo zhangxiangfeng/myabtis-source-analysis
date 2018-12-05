@@ -35,6 +35,7 @@ public class SqlPrintInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
+        System.err.println(this.getClass().getName());
         MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
         Object parameterObject = null;
         if (invocation.getArgs().length > 1) {
