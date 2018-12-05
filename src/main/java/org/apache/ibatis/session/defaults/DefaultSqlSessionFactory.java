@@ -88,12 +88,16 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         try {
             //step 1.获取设置的默认环境,至于设置在解析xml的时候，已经判断好了
             final Environment environment = configuration.getEnvironment();
+
             //step 2.根据环境的设置，获取对应的事务管理工厂类，JDBC || Manager
             final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+
             //step 3.设置数据源,数据库隔离级别，是否自动提交
             tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+
             //step 4.这一步设置执行器,默认是Simple,获取之后使用CachingExecutor 包了一层，即默认开启一级缓存(session级别)
             final Executor executor = configuration.newExecutor(tx, execType);
+
             return new DefaultSqlSession(configuration, executor, autoCommit);
         } catch (Exception e) {
             closeTransaction(tx); // may have fetched a connection so lets call close()

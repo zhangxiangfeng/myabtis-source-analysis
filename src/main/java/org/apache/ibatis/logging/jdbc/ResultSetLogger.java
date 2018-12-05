@@ -86,7 +86,7 @@ public final class ResultSetLogger extends BaseJdbcLogger implements InvocationH
                         final int columnCount = rsmd.getColumnCount();
                         if (first) {
                             first = false;
-                            printColumnHeaders(rsmd, columnCount);
+                            printColumnHeaders(rsmd, columnCount);//第一此循环打印列名称
                         }
                         printColumnValues(columnCount);
                     }

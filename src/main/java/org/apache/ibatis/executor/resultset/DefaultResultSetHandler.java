@@ -133,16 +133,22 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
         ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
+        //step 1.声明返回的结果集
         final List<Object> multipleResults = new ArrayList<Object>();
 
         int resultSetCount = 0;
+
+        //step 2.使用ResultSetWrapper进行包装
         ResultSetWrapper rsw = getFirstResultSet(stmt);
 
-        List<ResultMap> resultMaps = mappedStatement.getResultMaps();//获取这个sql的resultMap
+        //step 3.获取执行的结果集合
+        List<ResultMap> resultMaps = mappedStatement.getResultMaps();
         int resultMapCount = resultMaps.size();
         validateResultMapsCount(rsw, resultMapCount);
         while (rsw != null && resultMapCount > resultSetCount) {
             ResultMap resultMap = resultMaps.get(resultSetCount);
+
+            //step 4.使用multipleResults进行存储
             handleResultSet(rsw, resultMap, multipleResults, null);
             rsw = getNextResultSet(stmt);
             cleanUpAfterHandlingResultSet();
@@ -164,6 +170,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             }
         }
 
+        //step 5.判断结果集合是只有一个item就转一个对象返回
         return collapseSingleResultList(multipleResults);
     }
 
@@ -279,6 +286,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             throws SQLException {
         DefaultResultContext<Object> resultContext = new DefaultResultContext<Object>();
         skipRows(rsw.getResultSet(), rowBounds);
+        //step 1.循环处理每一行数据
         while (shouldProcessMoreRows(resultContext, rowBounds) && rsw.getResultSet().next()) {
             ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw.getResultSet(), resultMap, null);
             Object rowValue = getRowValue(rsw, discriminatedResultMap);
@@ -318,11 +326,14 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     private Object getRowValue(ResultSetWrapper rsw, ResultMap resultMap) throws SQLException {
         final ResultLoaderMap lazyLoader = new ResultLoaderMap();
+
+        //step 0.创建一个空对象
         Object resultObject = createResultObject(rsw, resultMap, lazyLoader, null);
         if (resultObject != null && !typeHandlerRegistry.hasTypeHandler(resultMap.getType())) {
             final MetaObject metaObject = configuration.newMetaObject(resultObject);
             boolean foundValues = !resultMap.getConstructorResultMappings().isEmpty();
             if (shouldApplyAutomaticMappings(resultMap, false)) {
+                //step 1.循环处理每一行数据到上一步生成的对象里
                 foundValues = applyAutomaticMappings(rsw, resultMap, metaObject, null) || foundValues;
             }
             foundValues = applyPropertyMappings(rsw, resultMap, metaObject, lazyLoader, null) || foundValues;

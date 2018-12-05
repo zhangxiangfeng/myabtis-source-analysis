@@ -78,10 +78,15 @@ import java.util.*;
  */
 public class Configuration {
 
+    //存储拦截器链
     protected final InterceptorChain interceptorChain = new InterceptorChain();
+    //存储类型转换器
     protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
+    //存储别名转换器
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+    //存储数据库语言
     protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
+    //存储所有的SQL语句,key=namespace+method,value
     protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection");
     protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");
     protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");
@@ -485,6 +490,8 @@ public class Configuration {
         executorType = executorType == null ? defaultExecutorType : executorType;
         executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
         Executor executor;
+
+        //setp 1.进行执行器选择
         if (ExecutorType.BATCH == executorType) {
             executor = new BatchExecutor(this, transaction);
         } else if (ExecutorType.REUSE == executorType) {
@@ -492,10 +499,15 @@ public class Configuration {
         } else {
             executor = new SimpleExecutor(this, transaction);
         }
+
+        //setp 2.是否开启了一级缓存(默认开启),注意这里将执行器传入了缓存执行器内，实则就是用选择的执行器进行代理
         if (cacheEnabled) {
             executor = new CachingExecutor(executor);
         }
+
+        //setp 3.进行拦截器的代理设置
         executor = (Executor) interceptorChain.pluginAll(executor);
+
         return executor;
     }
 

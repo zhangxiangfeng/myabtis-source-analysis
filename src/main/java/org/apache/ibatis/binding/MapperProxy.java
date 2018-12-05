@@ -42,6 +42,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //step 0.提前声明的方法将直接调用函数本身
         if (Object.class.equals(method.getDeclaringClass())) {
             try {
                 return method.invoke(this, args);
@@ -49,8 +50,10 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
                 throw ExceptionUtil.unwrapThrowable(t);
             }
         }
-        //这里缓存mapper method
+        //step 1.这里缓存mapper method
         final MapperMethod mapperMethod = cachedMapperMethod(method);
+
+        //step 2.进行真正的执行
         return mapperMethod.execute(sqlSession, args);
     }
 

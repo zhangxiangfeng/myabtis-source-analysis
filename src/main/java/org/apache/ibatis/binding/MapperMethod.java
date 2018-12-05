@@ -45,6 +45,9 @@ public class MapperMethod {
         this.method = new MethodSignature(config, method);
     }
 
+    /**
+     * 执行的时候进行CRUD的路由
+     */
     public Object execute(SqlSession sqlSession, Object[] args) {
         Object result;
         if (SqlCommandType.INSERT == command.getType()) {

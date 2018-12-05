@@ -12,4 +12,9 @@ public interface AccountAnnoMapper {
             "select * from test_table"
     })
     List<Account> selectAll();
+//
+//    @Select({
+//            "select * from test_table where tableId=#{tableId}"
+//    })
+//    List<Account> selectAll(Integer tableId);
 }
