@@ -2,12 +2,14 @@ package cn.openread.test.simple;
 
 import cn.openread.test.simple.classloader.SimonClassLoader;
 import com.alibaba.fastjson.JSON;
+import com.github.javafaker.Faker;
 import org.apache.ibatis.domain.account.Account;
 import org.apache.ibatis.domain.account.mappers.AccountAnnoMapper;
 import org.apache.ibatis.domain.account.mappers.AccountMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
+import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionManager;
 import org.junit.Before;
@@ -17,7 +19,9 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * test
@@ -35,7 +39,7 @@ public class SimpleTest {
     public void before() throws IOException {
         //step 1.读取配置文件
         Reader reader = Resources.getResourceAsReader("cn/openread/test/simple/xml/MapperConfig.xml");
-        sqlSession = SqlSessionManager.newInstance(reader).openSession();
+        sqlSession = SqlSessionManager.newInstance(reader).openSession(ExecutorType.BATCH);
 //        new SqlSessionFactoryBuilder().build(reader);
     }
 
@@ -71,6 +75,23 @@ public class SimpleTest {
 
         } finally {
 //            sqlSession.close();
+        }
+    }
+
+    @Test
+    public void testBatchInsert() throws IOException {
+        try {
+            AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
+            List<Account> accounts = new ArrayList<>();
+            for (int i = 0; i < 1000; i++) {
+                Faker faker = new Faker(Locale.CHINA);
+                accounts.add(new Account(faker.name().fullName(), faker.number().randomNumber()));
+            }
+            accountMapper.batchInsert(accounts);
+            log.debug("查询结果:" + JSON.toJSONString(accounts));
+        } finally {
+            sqlSession.commit();
+            sqlSession.close();
         }
     }
 

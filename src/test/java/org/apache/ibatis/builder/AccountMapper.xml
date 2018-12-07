@@ -34,6 +34,15 @@
     </select>
 
 
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into test_table (name , blance)
+        values
+        <foreach collection="params" item="item" index="index" separator=",">
+            (#{item.name,jdbcType=VARCHAR}, #{item.blance,jdbcType=BIGINT})
+        </foreach>
+    </insert>
+
+
     <select id="selectById" resultMap="Account" parameterType="java.lang.Long">
         select *
         from test_table

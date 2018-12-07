@@ -19,6 +19,14 @@ public class Account implements Serializable {
 
     protected Date lastUpdate;
 
+    public Account() {
+    }
+
+    public Account(String name, Long blance) {
+        this.name = name;
+        this.blance = blance;
+    }
+
     public Long getTableId() {
         return tableId;
     }

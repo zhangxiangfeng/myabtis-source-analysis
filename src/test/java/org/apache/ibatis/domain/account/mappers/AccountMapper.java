@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.domain.account.mappers;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.domain.account.Account;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public interface AccountMapper {
     Account selectById(Long tableId);
 
     List<Account> selectAll();
+
+    void batchInsert(@Param("params") List<Account> params);
 
     Long insertAuthorReturnPrimaryKey(Account account);
 
