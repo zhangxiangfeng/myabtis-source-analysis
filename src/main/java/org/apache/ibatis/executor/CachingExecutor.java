@@ -81,20 +81,35 @@ public class CachingExecutor implements Executor {
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
             throws SQLException {
+        //step 1.获取全局缓存的是实现类
         Cache cache = ms.getCache();
-        if (cache != null) {//TODO 这里是全局cache开启后走这里
+        if (cache != null) {
+
+            //step 2.判断缓存是否需要刷新(例如一个查询结果缓存了,但是后续对这个记录修改了,就需要刷新缓存)
             flushCacheIfRequired(ms);
+
+            //step 3.判断是否使用缓存 && 必须无处理器(如果有的话，还必须做处理,就不走缓存啦)
             if (ms.isUseCache() && resultHandler == null) {
+
+                //step 4.判断存储过程查询必须无OUT参数,因为走缓存了
                 ensureNoOutParams(ms, parameterObject, boundSql);
+
+                //step 5.根据缓存实现类去获取缓存,这个获取规则根据类的实现来定义
                 @SuppressWarnings("unchecked")
                 List<E> list = (List<E>) tcm.getObject(cache, key);
                 if (list == null) {
+
+                    //step 6.获取不到就直接进行查询
                     list = delegate.<E>query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+
+                    //step 7.然后将结果进行缓存
                     tcm.putObject(cache, key, list); // issue #578 and #116
                 }
                 return list;
             }
         }
+
+        //step 8.没有开启二级缓存就直接查询
         return delegate.<E>query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
     }
 

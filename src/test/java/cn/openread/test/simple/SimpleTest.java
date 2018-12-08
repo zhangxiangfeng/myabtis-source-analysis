@@ -22,6 +22,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * test
@@ -80,18 +83,37 @@ public class SimpleTest {
 
     @Test
     public void testBatchInsert() throws IOException {
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         try {
-            AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
-            List<Account> accounts = new ArrayList<>();
-            for (int i = 0; i < 1000; i++) {
-                Faker faker = new Faker(Locale.CHINA);
-                accounts.add(new Account(faker.name().fullName(), faker.number().randomNumber()));
+            CountDownLatch countDownLatch = new CountDownLatch(8);
+            Long start = System.currentTimeMillis();
+            for (int i = 0; i < 8; i++) {
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
+                        List<Account> accounts = new ArrayList<>();
+                        for (int i = 0; i < 1000; i++) {
+                            Faker faker = new Faker(Locale.CHINA);
+                            accounts.add(new Account(faker.name().fullName(), faker.number().randomNumber()));
+                        }
+                        accountMapper.batchInsert(accounts);
+                        countDownLatch.countDown();
+                        log.debug(Thread.currentThread().getName() + " is ok ");
+                    }
+                });
             }
-            accountMapper.batchInsert(accounts);
-            log.debug("查询结果:" + JSON.toJSONString(accounts));
+            countDownLatch.await();
+
+            Long end = System.currentTimeMillis();
+            log.warn("all thread is finish ! 用时:{}" + String.valueOf(((end - start) / 1000)));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } finally {
             sqlSession.commit();
             sqlSession.close();
+            executorService.shutdown();
         }
     }
 

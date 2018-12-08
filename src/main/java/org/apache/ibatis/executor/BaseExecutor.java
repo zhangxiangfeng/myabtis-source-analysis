@@ -144,13 +144,16 @@ public abstract class BaseExecutor implements Executor {
         List<E> list;
         try {
             queryStack++;
-            //TODO 这里走的是session级别的缓存
+
+            //step 1.从当前执行器获取缓存的map,进行查询
             list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
             if (list != null) {
-                log.trace("一级缓存======从缓存加载到数据 key = [" + key.toString() + "]  => ");
-                log.trace("value => " + JSON.toJSONString(list));
+                log.trace("从一级缓存加载到数据 key = [" + key.toString() + "]  => ");
+                log.trace("从一级缓存加载到数据 value = => " + JSON.toJSONString(list));
                 handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
             } else {
+
+                //step 2.这里去查询数据库
                 list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
             }
         } finally {
