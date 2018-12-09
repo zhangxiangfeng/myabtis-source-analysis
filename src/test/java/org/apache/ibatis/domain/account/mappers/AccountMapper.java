@@ -22,7 +22,7 @@ import java.util.List;
 
 public interface AccountMapper {
 
-    Account selectById(Long tableId);
+    Account selectById(@Param("tableId") Long tableId);
 
     List<Account> selectAll();
 

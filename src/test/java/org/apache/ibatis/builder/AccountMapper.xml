@@ -19,7 +19,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.apache.ibatis.domain.account.mappers.AccountMapper">
-    <cache eviction="LRU" type="cn.openread.test.simple.cache.MybatisRedisCache"/>
+    <!--<cache eviction="LRU" type="cn.openread.test.simple.cache.MybatisRedisCache"/>-->
 
     <resultMap id="Account" type="org.apache.ibatis.domain.account.Account">
         <id column="tableId" property="tableId" jdbcType="VARCHAR"/>
@@ -46,7 +46,7 @@
     <select id="selectById" resultMap="Account" parameterType="java.lang.Long">
         select *
         from test_table
-        where tableId = #{tableId}
+        where tableId = ${tableId}
     </select>
 
     <insert id="insertAuthorReturnPrimaryKey" useGeneratedKeys="true" keyProperty="tableId" keyColumn="tableId"

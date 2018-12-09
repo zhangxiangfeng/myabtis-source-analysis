@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.executor;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.logging.Log;
@@ -34,6 +33,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -149,7 +149,7 @@ public abstract class BaseExecutor implements Executor {
             list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
             if (list != null) {
                 log.trace("从一级缓存加载到数据 key = [" + key.toString() + "]  => ");
-                log.trace("从一级缓存加载到数据 value = => " + JSON.toJSONString(list));
+                log.trace("从一级缓存加载到数据 value =" + Arrays.toString(list.toArray()));
                 handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
             } else {
 
@@ -303,13 +303,18 @@ public abstract class BaseExecutor implements Executor {
         List<E> list;
         localCache.putObject(key, EXECUTION_PLACEHOLDER);
         try {
+            //step 1.进行查询
             list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
         } finally {
             localCache.removeObject(key);
         }
-        localCache.putObject(key, list);//正常是缓存结果
+
+        //step 2.缓存结果
+        localCache.putObject(key, list);
         if (ms.getStatementType() == StatementType.CALLABLE) {
-            localOutputParameterCache.putObject(key, parameter);//如果是存储过程的话，就缓存参数
+
+            //step 3.如果是存储过程的话，就缓存参数
+            localOutputParameterCache.putObject(key, parameter);
         }
         return list;
     }

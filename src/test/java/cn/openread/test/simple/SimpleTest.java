@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * test
@@ -37,8 +38,14 @@ public class SimpleTest {
     private final Log log = LogFactory.getLog(SimpleTest.class);
 
     private SqlSession sqlSession = null;
+    /**
+     * 多线程插入100W条数据
+     */
 
-    //    @Before
+    static volatile AtomicInteger nums = new AtomicInteger(0);
+    private SqlSessionManager sqlSessionManager = null;
+
+    @Before
     public void before() throws IOException {
         //step 1.读取配置文件
         Reader reader = Resources.getResourceAsReader("cn/openread/test/simple/xml/MapperConfig.xml");
@@ -46,7 +53,7 @@ public class SimpleTest {
 //        new SqlSessionFactoryBuilder().build(reader);
     }
 
-    @Before
+    //    @Before
     public void beforeForClassLoader() throws IOException {
         //step 1.自定义类加载器
         SimonClassLoader classLoader = new SimonClassLoader("D:\\Applications\\project\\labs\\myabtis-source-analysis\\lib");
@@ -58,27 +65,8 @@ public class SimpleTest {
         Reader reader = Resources.getResourceAsReader(classLoader, "MapperConfig.xml");
 
         //step 4.解析读取的文件流 && new一个SqlManager
-        SqlSessionManager sqlSessionManager = SqlSessionManager.newInstance(reader);
-        sqlSession = sqlSessionManager.openSession();
-    }
-
-    @Test
-    public void testSelectById() throws IOException {
-        try {
-            AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
-            Account account = accountMapper.selectById(10002L);
-            log.debug("查询结果:" + JSON.toJSONString(account));
-//            sqlSession.commit();
-            account = accountMapper.selectById(10002L);
-            log.debug("查询结果:" + JSON.toJSONString(account));
-
-            sqlSession.commit();
-            account = accountMapper.selectById(10002L);
-            log.debug("查询结果:" + JSON.toJSONString(account));
-
-        } finally {
-//            sqlSession.close();
-        }
+        sqlSessionManager = SqlSessionManager.newInstance(reader);
+        sqlSession = sqlSessionManager.openSession(ExecutorType.BATCH);
     }
 
     @Test
@@ -118,13 +106,59 @@ public class SimpleTest {
     }
 
     @Test
-    public void testBatchAnnoInsert() throws IOException {
+    public void testSelectById() throws IOException {
+        try {
+            AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
+            Account account = accountMapper.selectById(50002L);
+            log.debug("查询结果:" + JSON.toJSONString(account));
+//            sqlSession.commit();
+            account = accountMapper.selectById(50002L);
+            log.debug("查询结果:" + JSON.toJSONString(account));
 
+            sqlSession.commit();
+            account = accountMapper.selectById(50002L);
+            log.debug("查询结果:" + JSON.toJSONString(account));
+
+        } finally {
+//            sqlSession.close();
+        }
+    }
+
+    @Test
+    public void testBatch100WAnnoInsert() throws IOException {
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         try {
-            CountDownLatch countDownLatch = new CountDownLatch(12);
             Long start = System.currentTimeMillis();
-            for (int i = 0; i < 12; i++) {
+            for (int i = 0; i < 100; i++) {
+                sqlSession = sqlSessionManager.openSession(ExecutorType.SIMPLE);
+                AccountAnnoMapper accountMapper = sqlSession.getMapper(AccountAnnoMapper.class);
+                List<Account> accounts = new ArrayList<>();
+                //一次添加多少数据
+                int one_times = 100;
+                for (int b = 0; b < one_times; b++) {
+                    Faker faker = new Faker(Locale.ENGLISH);
+                    accounts.add(new Account(faker.name().fullName(), faker.number().randomNumber()));
+                }
+                accountMapper.batchInsert(accounts);
+                sqlSession.commit(true);
+                nums.addAndGet(one_times);
+                log.warn(Thread.currentThread().getName() + " is ok  nums：" + nums.get());
+            }
+
+            Long end = System.currentTimeMillis();
+            log.warn("all thread is finish ! 用时: " + String.valueOf(((end - start) / 1000)));
+        } finally {
+            executorService.shutdown();
+        }
+    }
+
+    @Test
+    public void testBatchAnnoInsert() throws IOException {
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        try {
+            CountDownLatch countDownLatch = new CountDownLatch(1000);
+            Long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000; i++) {
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {

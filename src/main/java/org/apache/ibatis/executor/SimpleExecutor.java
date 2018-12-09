@@ -56,8 +56,13 @@ public class SimpleExecutor extends BaseExecutor {
     public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
         Statement stmt = null;
         try {
+            //step 1.获取配置
             Configuration configuration = ms.getConfiguration();
+
+            //step 2.获取参数处理器,内部由RoutingStatementHandler进行判断StatementType(STATEMENT, PREPARED, CALLABLE),这个配置在读取mapper的时候，已经解析到了~
             StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+
+            //step 3.设置参数
             stmt = prepareStatement(handler, ms.getStatementLog());
             return handler.<E>query(stmt, resultHandler);
         } finally {
