@@ -38,7 +38,7 @@ public class SimpleTest {
 
     private SqlSession sqlSession = null;
 
-    @Before
+    //    @Before
     public void before() throws IOException {
         //step 1.读取配置文件
         Reader reader = Resources.getResourceAsReader("cn/openread/test/simple/xml/MapperConfig.xml");
@@ -46,10 +46,10 @@ public class SimpleTest {
 //        new SqlSessionFactoryBuilder().build(reader);
     }
 
-    //    @Before
+    @Before
     public void beforeForClassLoader() throws IOException {
         //step 1.自定义类加载器
-        SimonClassLoader classLoader = new SimonClassLoader("C:\\SortWare\\simon-projects\\labs\\mybatis-3\\lib");
+        SimonClassLoader classLoader = new SimonClassLoader("D:\\Applications\\project\\labs\\myabtis-source-analysis\\lib");
 
         //step 2.设置默认的编码
         Resources.setCharset(Charset.forName("UTF-8"));
@@ -82,7 +82,7 @@ public class SimpleTest {
     }
 
     @Test
-    public void testBatchInsert() throws IOException {
+    public void testBatchXMLInsert() throws IOException {
 
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         try {
@@ -93,6 +93,42 @@ public class SimpleTest {
                     @Override
                     public void run() {
                         AccountMapper accountMapper = sqlSession.getMapper(AccountMapper.class);
+                        List<Account> accounts = new ArrayList<>();
+                        for (int i = 0; i < 1000; i++) {
+                            Faker faker = new Faker(Locale.CHINA);
+                            accounts.add(new Account(faker.name().fullName(), faker.number().randomNumber()));
+                        }
+                        accountMapper.batchInsert(accounts);
+                        countDownLatch.countDown();
+                        log.debug(Thread.currentThread().getName() + " is ok ");
+                    }
+                });
+            }
+            countDownLatch.await();
+
+            Long end = System.currentTimeMillis();
+            log.warn("all thread is finish ! 用时:{}" + String.valueOf(((end - start) / 1000)));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            sqlSession.commit();
+            sqlSession.close();
+            executorService.shutdown();
+        }
+    }
+
+    @Test
+    public void testBatchAnnoInsert() throws IOException {
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        try {
+            CountDownLatch countDownLatch = new CountDownLatch(12);
+            Long start = System.currentTimeMillis();
+            for (int i = 0; i < 12; i++) {
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AccountAnnoMapper accountMapper = sqlSession.getMapper(AccountAnnoMapper.class);
                         List<Account> accounts = new ArrayList<>();
                         for (int i = 0; i < 1000; i++) {
                             Faker faker = new Faker(Locale.CHINA);
