@@ -491,7 +491,7 @@ public class Configuration {
         executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
         Executor executor;
 
-        //setp 1.进行执行器选择
+        //step 1.进行执行器选择
         if (ExecutorType.BATCH == executorType) {
             executor = new BatchExecutor(this, transaction);
         } else if (ExecutorType.REUSE == executorType) {
@@ -500,12 +500,12 @@ public class Configuration {
             executor = new SimpleExecutor(this, transaction);
         }
 
-        //setp 2.是否开启了一级缓存(默认开启),注意这里将执行器传入了缓存执行器内，实则就是用选择的执行器进行代理
+        //step 2.是否开启了一级缓存(默认开启),注意这里将执行器传入了缓存执行器内，实则就是用选择的执行器进行代理
         if (cacheEnabled) {
             executor = new CachingExecutor(executor);
         }
 
-        //setp 3.进行拦截器的代理设置-(到每一个拦截器内部也可以针对性拦截),这里设置后,之后这个executor执行方法的时候,都会被依次拦截
+        //step 3.进行拦截器的代理设置-(到每一个拦截器内部也可以针对性拦截),这里设置后,之后这个executor执行方法的时候,都会被依次拦截
         executor = (Executor) interceptorChain.pluginAll(executor);
 
         return executor;

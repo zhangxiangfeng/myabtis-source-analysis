@@ -26,7 +26,13 @@ public class InterceptorChain {
 
     private final List<Interceptor> interceptors = new ArrayList<Interceptor>();
 
-    //所有的拦截器，可以定义是否包装一下
+    /**
+     * 拦截器的工作策略
+     * <p>
+     * 1.对已经发现(从xml配置读取)的所有拦截器,进行拦截包装
+     * 2.拦截的顺序遵循栈的机制 后进先出
+     * 3.真正的拦截逻辑是在Plugin中进行的
+     */
     public Object pluginAll(Object target) {
         for (Interceptor interceptor : interceptors) {
             target = interceptor.plugin(target);
