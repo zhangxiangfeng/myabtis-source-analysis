@@ -24,6 +24,11 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+/**
+ * 拦截器测试
+ * <p>
+ * 这里演示对hashmap进行拦截
+ */
 public class PluginTest {
 
     @Test
@@ -39,6 +44,7 @@ public class PluginTest {
         map = (Map) new AlwaysMapPlugin().plugin(map);
         assertFalse("Always".equals(map.toString()));
     }
+
 
     @Intercepts({@Signature(type = Map.class, method = "get", args = {Object.class})})
     public static class AlwaysMapPlugin implements Interceptor {

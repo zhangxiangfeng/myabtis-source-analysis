@@ -31,7 +31,7 @@ public class InterceptorChain {
      * <p>
      * 1.对已经发现(从xml配置读取)的所有拦截器,进行拦截包装
      * 2.拦截的顺序遵循栈的机制 后进先出
-     * 3.真正的拦截逻辑是在Plugin中进行的
+     * 3.真正的拦截逻辑是在Plugin.java中进行的
      */
     public Object pluginAll(Object target) {
         for (Interceptor interceptor : interceptors) {
